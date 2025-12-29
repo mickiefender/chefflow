@@ -1,0 +1,2 @@
+ALTER TABLE restaurants
+ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
