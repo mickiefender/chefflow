@@ -17,7 +17,7 @@ interface OrderItem {
 
 interface OrderWithDetails {
   id: string
-  status: string
+  order_status: string // Changed from status to order_status
   payment_status: string
   payment_method: string
   total_amount: number

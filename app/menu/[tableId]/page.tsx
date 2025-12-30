@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/client"
 import { useRealtimeMenu } from "@/lib/hooks/use-realtime-menu"
-import { LogOut, Minus, Plus, Search, Send, ShoppingCart, Utensils } from "lucide-react"
+import { LogOut, Minus, Plus, PackageSearch, Search, Send, ShoppingCart, Utensils } from "lucide-react"
+import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { useCart } from "./use-cart"
 import { Category, MenuItem } from "./types"
@@ -216,6 +217,12 @@ export default function MenuPage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Link href="/track-order" passHref>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  <PackageSearch className="h-4 w-4 mr-2" />
+                  Track Order
+                </Button>
+              </Link>
               <div className="bg-green-100 px-4 py-2 rounded-full flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-green-600" />
                 <span className="font-semibold text-green-600">{cartCount} items</span>
@@ -223,8 +230,7 @@ export default function MenuPage() {
               <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
                 <LogOut className="h-4 w-4" />
               </Button>
-            </div>
-          </div>
+            </div>          </div>
         </div>
       </div>
 

@@ -5,9 +5,9 @@ export async function PUT(request: NextRequest, { params }: { params: { orderId:
   try {
     const supabase = await createClient()
     const body = await request.json()
-    const { status } = body
+    const { order_status } = body
 
-    const { error } = await supabase.from("orders").update({ status }).eq("id", params.orderId)
+    const { error } = await supabase.from("orders").update({ order_status }).eq("id", params.orderId)
 
     if (error) throw error
 
@@ -23,7 +23,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orderId:
         await supabase.from("activity_logs").insert({
           restaurant_id: order.restaurant_id,
           staff_id: user.id,
-          action: `updated_order_status_to_${status}`,
+          action: `updated_order_status_to_${order_status}`,
           details: { orderId: params.orderId },
         })
       }

@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: customerEmail,
-            orderId: order.id.slice(0, 8).toUpperCase(), // Shorten order ID for email subject
+            orderId: order.human_readable_id, // Use the new human-readable ID
             restaurantName: restaurantName,
             tableNumber: tableNumber,
             orderedItems: orderedItemsForEmail,

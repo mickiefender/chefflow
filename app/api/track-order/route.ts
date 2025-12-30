@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { supabaseService } from "@/lib/supabase/service"
 
 export async function GET(request: Request) {
-  const supabase = createClient() // Server-side Supabase client
-
+  const supabase = supabaseService
   const { searchParams } = new URL(request.url)
   const orderId = searchParams.get("orderId")
   const email = searchParams.get("email")
@@ -17,8 +16,8 @@ export async function GET(request: Request) {
     // but this server-side check adds a crucial layer of security.
     const { data: order, error } = await supabase
       .from("orders")
-      .select("*, order_items(*)") // Select order details and related items
-      .eq("id", orderId)
+      .select("*") // Select order details and related items
+      .eq("human_readable_id", orderId)
       .eq("customer_email", email)
       .single()
 
@@ -31,11 +30,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
     }
 
-    // Filter out any sensitive information before sending to client
-    const { customer_id, ...safeOrder } = order
-
-    return NextResponse.json(safeOrder)
-  } catch (err) {
+    return NextResponse.json(order)
+  } catch (err: any) {
     console.error("API error during order tracking:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }

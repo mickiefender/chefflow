@@ -17,6 +17,7 @@ interface OrderItem {
 
 interface Order {
   id: string
+  human_readable_id: string
   created_at: string
   total_amount: number
   payment_status: string
@@ -178,7 +179,7 @@ export default function OrderTrackingPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">Order #{order.id}</CardTitle>
+            <CardTitle className="text-3xl">Order #{order.human_readable_id}</CardTitle>
             <CardDescription>Placed on {format(new Date(order.created_at), "PPP p")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -198,12 +199,12 @@ export default function OrderTrackingPage() {
               <p>
                 <strong>Customer Email:</strong> {order.customer_email}
               </p>
-              {order.order_status.toLowerCase() === "in-progress" && order.preparation_started_at && (
+              {order.order_status && order.order_status.toLowerCase() === "in-progress" && order.preparation_started_at && (
                 <p>
                   <strong>Preparation Time:</strong> <Timer startTime={order.preparation_started_at} />
                 </p>
               )}
-              {order.order_status.toLowerCase() === "completed" &&
+              {order.order_status && order.order_status.toLowerCase() === "completed" &&
                 order.preparation_started_at &&
                 order.preparation_completed_at && (
                   <p>
