@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { createClient } from "@/lib/supabase/client" // Corrected import path
+import { createClient } from "@/lib/supabase/client"
 import { useRealtimeMenu } from "@/lib/hooks/use-realtime-menu"
 import { LogOut, Minus, Plus, Search, Send, ShoppingCart, Utensils } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -102,37 +102,32 @@ export default function MenuPage() {
 
     setSubmittingOrder(true)
     try {
-      const { data: orderData, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          restaurant_id: restaurantId,
-          table_id: tableId,
-          total_amount: finalTotal,
-          status: "Pending",
-          customer_email: customerEmail,
-        })
-        .select("id")
-        .single()
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          restaurantId,
+          tableId,
+          items: cartItems.map(item => ({
+            menuItemId: item.id,
+            quantity: item.quantity,
+            price: item.price, // Pass price for server-side recalculation/validation
+          })),
+          customerEmail,
+          // customerName: "Guest", // Optional: if you want to capture a name
+        }),
+      })
 
-      if (orderError) throw orderError
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create order via API");
+      }
 
-      const newOrderId = orderData.id
-
-      const orderItemsToInsert = cartItems.map((item) => ({
-        order_id: newOrderId,
-        menu_item_id: item.id,
-        quantity: item.quantity,
-        unit_price: item.price,
-      }))
-
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItemsToInsert)
-
-      if (itemsError) throw itemsError
-
-      return newOrderId
+      const orderData = await response.json()
+      return orderData.id
     } catch (error) {
-      console.error("Error creating order:", JSON.stringify(error, null, 2))
-      alert("There was an issue placing your order. Please try again.")
+      console.error("Error creating order:", error)
+      alert(`There was an issue placing your order: ${error instanceof Error ? error.message : String(error)}. Please try again.`)
       return null
     } finally {
       setSubmittingOrder(false)

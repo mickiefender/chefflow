@@ -238,8 +238,8 @@ export default function RestaurantDashboard() {
   const unpaidToday = todaysOrders.length - paidToday
 
   const dailyOrderData = [
-    { name: 'Paid', value: paidToday, fill: '#22c55e' }, // green-500
-    { name: 'Unpaid', value: unpaidToday, fill: '#ef4444' }, // red-500 for unpaid
+    { name: 'Paid', value: paidToday, fill: '#4ade80' }, // green-400
+    { name: 'Unpaid', value: unpaidToday, fill: '#f87171' }, // red-400
   ];
 
 

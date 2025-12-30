@@ -1,16 +1,14 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+
 
 export const metadata: Metadata = {
-  title: "RestaurantPOS - Restaurant Management System",
+  title: "ChefFlow - Restaurant Management System",
   description: "Complete restaurant management system with NFC menu, staff tracking, and admin dashboard",
-    generator: 'v0.app'
+    generator: 'Mickie'
 }
 
 export default function RootLayout({
