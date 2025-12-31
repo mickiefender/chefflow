@@ -17,7 +17,7 @@ interface OrderItem {
 
 interface OrderWithDetails {
   id: string
-  order_status: string // Changed from status to order_status
+  status: string
   payment_status: string
   payment_method: string
   total_amount: number
@@ -51,16 +51,14 @@ function OrdersPageComponent() {
       // Find the admin's name to log it
       const { data: admin } = await supabase.from("restaurant_admins").select("full_name").eq("id", user.id).single()
 
-      await supabase
-        .from("orders")
-        .update({
-          status,
-          updated_by_name: admin?.full_name || user.email, // Fallback to email if name not found
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", orderId)
-    })
-  }
+      if (error) {
+        console.error("Error updating order status:", error);
+        alert(`Failed to update order status: ${error.message}`);
+      } else {
+        fetchOrders(); // Ensure UI refreshes
+      }
+    });
+  };
 
   const handleMarkAsPaid = (orderId: string) => {
     startTransition(async () => {

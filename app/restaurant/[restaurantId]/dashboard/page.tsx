@@ -468,31 +468,7 @@ export default function RestaurantDashboard() {
                 </CardContent>
               </Card>
 
-              {/* AC Overview Card */}
-              <Card className="bg-slate-900 border-slate-800">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium text-slate-400">Ac Overview</CardTitle>
-                    <MoreVertical className="w-4 h-4 text-slate-500" />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Arrival</span>
-                    <span className="text-sm font-medium text-white">GH₵{(data?.totalRevenue || 0).toFixed(0)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Withdrawal</span>
-                    <span className="text-sm font-medium text-white">GH₵3,600.00</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Total Balance</span>
-                    <span className="text-sm font-medium text-white">
-                      GH₵{((data?.totalRevenue || 0) * 0.7).toFixed(0)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+             
             </div>
           </div>
 

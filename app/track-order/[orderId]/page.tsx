@@ -12,7 +12,10 @@ import { format } from "date-fns"
 interface OrderItem {
   name: string
   quantity: number
-  price: number
+  unit_price: number
+  menu_items: {
+    image_url: string | null
+  } | null
 }
 
 interface Order {
@@ -21,11 +24,14 @@ interface Order {
   created_at: string
   total_amount: number
   payment_status: string
+  payment_method: string
   order_status: string // e.g., 'PENDING', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED'
   customer_email: string
-  items: OrderItem[] | null // Assuming items are stored as JSON or a linked table
   preparation_started_at?: string
   preparation_completed_at?: string
+  restaurants: { name: string } | null
+  restaurant_tables: { table_number: string } | null
+  order_items: OrderItem[]
 }
 
 function formatDuration(ms: number) {
@@ -186,8 +192,21 @@ export default function OrderTrackingPage() {
             <div>
               <h3 className="text-lg font-semibold mb-2">Order Summary</h3>
               <p>
+                <strong>Restaurant:</strong> {order.restaurants?.name || "N/A"}
+              </p>
+              <p>
+                <strong>Table Number:</strong> {order.restaurant_tables?.table_number || "N/A"}
+              </p>
+              <p>
+                <strong>Order Time:</strong> {format(new Date(order.created_at), "PPP p")}
+              </p>
+              <p>
                 <strong>Status:</strong>{" "}
                 <span className="font-medium text-primary uppercase">{order.order_status}</span>
+              </p>
+              <p>
+                <strong>Payment Method:</strong>{" "}
+                <span className="font-medium uppercase">{order.payment_method || "N/A"}</span>
               </p>
               <p>
                 <strong>Payment Status:</strong>{" "}
@@ -217,16 +236,24 @@ export default function OrderTrackingPage() {
                 )}
             </div>
 
-            {order.items && order.items.length > 0 && (
+            {order.order_items && order.order_items.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold mb-2">Items</h3>
                 <ul className="space-y-2">
-                  {order.items.map((item, index) => (
-                    <li key={index} className="flex justify-between items-center border-b pb-2 last:border-b-0">
-                      <span>
-                        {item.name} x {item.quantity}
-                      </span>
-                      <span>${item.price.toFixed(2)}</span>
+                  {order.order_items.map((item, index) => (
+                    <li key={index} className="flex items-center gap-3 border-b pb-2 last:border-b-0">
+                      {item.menu_items?.image_url && (
+                        <img
+                          src={item.menu_items.image_url}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium">{item.name} x {item.quantity}</p>
+                        <p className="text-sm text-muted-foreground">${item.unit_price.toFixed(2)} each</p>
+                      </div>
+                      <span className="font-semibold">${(item.unit_price * item.quantity).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>

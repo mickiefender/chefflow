@@ -16,7 +16,19 @@ export async function GET(request: Request) {
     // but this server-side check adds a crucial layer of security.
     const { data: order, error } = await supabase
       .from("orders")
-      .select("*") // Select order details and related items
+      .select(
+        `
+        *,
+        order_items (
+          name,
+          quantity,
+          unit_price,
+          menu_items ( image_url )
+        ),
+        restaurants ( name ),
+        restaurant_tables ( table_number )
+        `
+      )
       .eq("human_readable_id", orderId)
       .eq("customer_email", email)
       .single()

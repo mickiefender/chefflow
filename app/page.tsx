@@ -44,9 +44,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-slate-900 hover:bg-slate-800">
-                Get Started
-              </Button>
+              <Button className="bg-slate-900 hover:bg-slate-800">Get Started</Button>
             </Link>
           </div>
         </div>
@@ -94,12 +92,36 @@ export default function Home() {
           <p className="text-center text-sm font-semibold text-slate-500 uppercase tracking-wide mb-8">
             Trusted by leading restaurants
           </p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center opacity-60">
-            <div className="font-semibold text-slate-600">5-Star Bistro</div>
-            <div className="font-semibold text-slate-600">Urban Eats</div>
-            <div className="font-semibold text-slate-600">Cafe Central</div>
-            <div className="font-semibold text-slate-600">Grill House</div>
-            <div className="font-semibold text-slate-600">The Fusion</div>
+          <div className="overflow-hidden">
+            <div className="animate-scroll flex gap-12 md:gap-16 items-center">
+              {/* Original set of restaurants */}
+              {[
+                { name: "Baltic Cousine", src: "/images/logo/Blue_Minimalist_Real_Estate_Logo-removebg-preview.png" },
+                { name: "Urban Eats", src: "/images/logo/Brown_and_White_SImple_Modern_Professional_Catering_Logo-removebg-preview.png" },
+                { name: "Olivia's Kitchen", src: "/images/logo/Olivia's kitchen.png" },
+                { name: "Rimberio", src: "/images/logo/Rimberio.png" },
+               
+                // Duplicate set for seamless loop
+               { name: "Baltic Cousine", src: "/images/logo/Blue_Minimalist_Real_Estate_Logo-removebg-preview.png" },
+                { name: "Urban Eats", src: "/images/logo/Brown_and_White_SImple_Modern_Professional_Catering_Logo-removebg-preview.png" },
+                { name: "Olivia's Kitchen", src: "/images/logo/Olivia's kitchen.png" },
+                { name: "Rimberio", src: "/images/logo/Rimberio.png" },
+              ].map((restaurant, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 flex flex-col items-center gap-3 opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  <Image
+                    src={restaurant.src || "/placeholder.svg"}
+                    alt={restaurant.name}
+                    width={120}
+                    height={60}
+                    className="h-12 w-auto object-contain"
+                  />
+                  <p className="text-sm font-medium text-slate-600 text-center whitespace-nowrap">{restaurant.name}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -124,10 +146,10 @@ export default function Home() {
             <div>
               <div className="relative rounded-lg overflow-hidden bg-slate-100 border border-slate-300">
                 <Image
-                  src="/restaurant-dashboard-with-metrics-charts-and-order.jpg"
+                  src="/images/homepage_images/Real-time Metrics Dashboard.png"
                   alt="ChefFlow Dashboard Preview"
                   width={600}
-                  height={500}
+                  height={600}
                   className="w-full h-auto"
                 />
               </div>
@@ -148,7 +170,7 @@ export default function Home() {
                   <p className="text-sm text-slate-600">Orders Today</p>
                 </div>
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">$4,852</div>
+                  <div className="text-2xl font-bold text-blue-600 mb-1">GH¢40,852</div>
                   <p className="text-sm text-slate-600">Revenue</p>
                 </div>
                 <div className="p-4 bg-green-50 rounded-lg border border-green-200">
@@ -202,7 +224,7 @@ export default function Home() {
           </div>
           <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-300">
             <Image
-              src="/kitchen-display-system-screen-with-orders-status.jpg"
+              src="/images/homepage_images/Smart Kitchen Display System.png"
               alt="Kitchen Display System"
               width={600}
               height={500}
@@ -217,7 +239,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-300">
             <Image
-              src="/order-management-interface-with-nfc-ordering.jpg"
+              src="/images/homepage_images/CHEFFLOW.jpg"
               alt="Order Management System"
               width={600}
               height={500}
@@ -267,7 +289,7 @@ export default function Home() {
 
         <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-300 mb-12">
           <Image
-            src="/restaurant-analytics-dashboard-with-sales-charts-r.jpg"
+            src="/images/homepage_images/Business Intelligence at Your Fingertips.png"
             alt="Analytics Dashboard"
             width={1200}
             height={400}
@@ -339,7 +361,7 @@ export default function Home() {
             </div>
             <div className="rounded-lg overflow-hidden bg-slate-100 border border-slate-300">
               <Image
-                src="/security-features-encryption-audit-logs-admin-pane.jpg"
+                src="/images/homepage_images/End-to-End Encryption.jpg"
                 alt="Security Dashboard"
                 width={500}
                 height={400}
