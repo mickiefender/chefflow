@@ -15,3 +15,26 @@ export function debounce<T extends (...args: any[]) => void>(func: T, delay: num
     timeout = setTimeout(() => func.apply(context, args), delay);
   } as T;
 }
+
+export function parseAndFormatIngredients(ingredients: string | string[] | null | undefined): string[] {
+  if (!ingredients) {
+    return [];
+  }
+
+  if (Array.isArray(ingredients)) {
+    return ingredients.map(i => i.trim()).filter(Boolean);
+  }
+
+  // Attempt to parse if it's a string
+  try {
+    const parsed = JSON.parse(ingredients);
+    if (Array.isArray(parsed)) {
+      return parsed.map(i => i.trim()).filter(Boolean);
+    }
+  } catch (e) {
+    // If JSON parsing fails, treat the entire string as a single ingredient
+    return ingredients.split(',').map(i => i.trim()).filter(Boolean);
+  }
+
+  return [];
+}

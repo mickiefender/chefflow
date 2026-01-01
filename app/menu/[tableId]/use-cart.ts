@@ -1,12 +1,32 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { MenuItem } from "./types"
 
 export interface CartItem extends MenuItem {
   quantity: number
 }
 
+const isBrowser = typeof window !== "undefined"
+
 export function useCart() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    if (!isBrowser) return []
+    try {
+      const item = window.localStorage.getItem("cart")
+      return item ? JSON.parse(item) : []
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  })
+
+  useEffect(() => {
+    if (!isBrowser) return
+    try {
+      window.localStorage.setItem("cart", JSON.stringify(cartItems))
+    } catch (error) {
+      console.error(error)
+    }
+  }, [cartItems])
 
   const addToCart = (item: MenuItem) => {
     setCartItems((prevItems) => {

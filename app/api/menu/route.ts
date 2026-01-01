@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
+import { parseAndFormatIngredients } from "@/lib/utils"
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,7 +24,9 @@ export async function GET(request: NextRequest) {
         description,
         price,
         image_url,
-        available
+        available,
+        ingredients,
+        preparation_time
       )
     `,
       )
@@ -32,7 +35,16 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
-    return NextResponse.json(data)
+    // Apply parsing to ingredients in fetched menu items
+    const processedData = data?.map(category => ({
+      ...category,
+      menu_items: category.menu_items?.map(item => ({
+        ...item,
+        ingredients: parseAndFormatIngredients(item.ingredients),
+      }))
+    }));
+
+    return NextResponse.json(processedData)
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch menu" }, { status: 500 })
   }
@@ -42,6 +54,11 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     const body = await request.json()
+
+    // Process ingredients before insertion
+    if (body.ingredients !== undefined) {
+      body.ingredients = parseAndFormatIngredients(body.ingredients);
+    }
 
     const { error } = await supabase.from("menu_items").insert(body)
 

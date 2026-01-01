@@ -21,4 +21,6 @@ export interface MenuItem {
   image_url: string | null
   category_id: string
   available: boolean
+  ingredients: string[] | null
+  preparation_time: number | null
 }

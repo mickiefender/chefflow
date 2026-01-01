@@ -90,6 +90,8 @@ CREATE TABLE IF NOT EXISTS menu_items (
   price DECIMAL(10, 2) NOT NULL,
   image_url TEXT,
   available BOOLEAN DEFAULT TRUE,
+  ingredients TEXT[],
+  preparation_time INTEGER, -- in minutes
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

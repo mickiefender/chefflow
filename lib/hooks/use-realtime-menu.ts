@@ -13,9 +13,11 @@ interface MenuItem {
   available: boolean
   image_url: string | null
   category_id: string
+  ingredients: string[] | null
+  preparation_time: number | null
 }
 
-export function useRealtimeMenu(restaurantId: string) {
+export function useRealtimeMenu(restaurantId: string, options: { fetchUnavailable?: boolean } = {}) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -24,11 +26,16 @@ export function useRealtimeMenu(restaurantId: string) {
   const fetchMenu = async () => {
     setLoading(true) // Set loading to true when fetching starts
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("menu_items")
         .select("*")
         .eq("restaurant_id", restaurantId)
-        .eq("available", true) // Assuming 'available' logic is needed here too
+
+      if (!options.fetchUnavailable) {
+        query = query.eq("available", true)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         console.error("Error fetching menu:", error)

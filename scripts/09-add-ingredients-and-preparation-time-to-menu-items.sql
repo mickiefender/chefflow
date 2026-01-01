@@ -1,0 +1,3 @@
+ALTER TABLE menu_items
+ADD COLUMN IF NOT EXISTS ingredients TEXT[],
+ADD COLUMN IF NOT EXISTS preparation_time INTEGER;

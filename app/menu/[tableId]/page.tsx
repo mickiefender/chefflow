@@ -324,6 +324,11 @@ export default function MenuPage() {
                 </div>
               ) : (
                 filteredItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/menu/${tableId}/${item.id}`}
+                    className="overflow-hidden hover:shadow-lg transition cursor-pointer border-gray-200 hover:border-green-300 flex flex-col"
+                  >
                   <Card
                     key={item.id}
                     className="overflow-hidden hover:shadow-lg transition cursor-pointer border-gray-200 hover:border-green-300 flex flex-col"
@@ -357,7 +362,10 @@ export default function MenuPage() {
                           <Button
                             size="sm"
                             disabled={!item.available}
-                            onClick={() => addToCart(item)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              addToCart(item)
+                            }}
                             className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
                           >
                             <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
@@ -371,6 +379,7 @@ export default function MenuPage() {
                       </div>
                     </CardContent>
                   </Card>
+                  </Link>
                 ))
               )}
             </div>

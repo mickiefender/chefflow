@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 import { useRealtimeMenu } from "@/lib/hooks/use-realtime-menu"
 import { Plus, ArrowLeft, Upload, Trash2, Edit2, ImageIcon, Loader2, X, Sparkles, Save, XCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import Link from "next/link"
 import { useMediaUpload } from "@/lib/hooks/use-media-upload"
+import { parseAndFormatIngredients } from "@/lib/utils"
 
 interface MenuItem {
   id: string
@@ -32,6 +34,8 @@ interface MenuItem {
   phone: string | null
   image_url: string | null
   category_id: string
+  ingredients: string[] | null
+  preparation_time: number | null
 }
 
 interface Category {
@@ -47,11 +51,11 @@ export default function MenuManagementPage() {
   const supabase = createClient()
   const { upload, loading: uploadLoading, error: uploadError } = useMediaUpload()
 
-  const { menuItems, loading, refetch } = useRealtimeMenu(restaurantId)
+  const { menuItems, loading, refetch } = useRealtimeMenu(restaurantId, { fetchUnavailable: true })
 
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [newItem, setNewItem] = useState({ name: "", price: "", description: "", phone: "", category_id: "" })
+  const [newItem, setNewItem] = useState({ name: "", price: "", description: "", phone: "", category_id: "", ingredients: "", preparation_time: "" })
   const [newItemImage, setNewItemImage] = useState<File | null>(null)
   const [newCategory, setNewCategory] = useState({ name: "", description: "" })
   const [creatingCategory, setCreatingCategory] = useState(false)
@@ -98,10 +102,12 @@ export default function MenuManagementPage() {
         image_url: imageUrl,
         category_id: selectedCategory,
         available: true,
+        preparation_time: newItem.preparation_time ? Number.parseInt(newItem.preparation_time) : null,
+        ingredients: parseAndFormatIngredients(newItem.ingredients),
       })
 
       if (!error) {
-        setNewItem({ name: "", price: "", description: "", phone: "", category_id: newItem.category_id })
+        setNewItem({ name: "", price: "", description: "", phone: "", category_id: newItem.category_id, ingredients: "", preparation_time: "" })
         setNewItemImage(null)
         refetch() // Refresh menu after adding item
       } else {
@@ -158,11 +164,12 @@ export default function MenuManagementPage() {
         },
         body: JSON.stringify({
           name: editingItem.name,
-          // Commission is now calculated on the frontend before sending to the backend
-          price: Number(editingItem.price) * 1.1,
+          price: Number(editingItem.price),
           description: editingItem.description,
           phone: editingItem.phone,
           category_id: editingItem.category_id,
+          preparation_time: editingItem.preparation_time,
+          ingredients: editingItem.ingredients,
         }),
       })
 
@@ -170,7 +177,7 @@ export default function MenuManagementPage() {
         const errorData = await response.json()
         throw new Error(errorData.error || "Failed to update menu item")
       } else {
-        refetch() // Refresh menu after updating item
+        await refetch() // Refresh menu after updating item
       }
 
       // Close the edit form
@@ -506,6 +513,31 @@ export default function MenuManagementPage() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="preparation_time" className="text-sm font-medium text-slate-400">
+                    Preparation Time (minutes, optional)
+                  </Label>
+                  <Input
+                    id="preparation_time"
+                    type="number"
+                    value={newItem.preparation_time}
+                    onChange={(e) => setNewItem({ ...newItem, preparation_time: e.target.value })}
+                    placeholder="e.g., 15"
+                    className="mt-1 bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ingredients" className="text-sm font-medium text-slate-400">
+                    Ingredients (comma-separated, optional)
+                  </Label>
+                  <Input
+                    id="ingredients"
+                    value={newItem.ingredients}
+                    onChange={(e) => setNewItem({ ...newItem, ingredients: e.target.value })}
+                    placeholder="e.g., Chicken, Lettuce, Tomato"
+                    className="mt-1 bg-slate-800 border-slate-700 text-white"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="image" className="text-sm font-medium text-slate-400">
                     Image (Optional)
                   </Label>
@@ -576,11 +608,6 @@ export default function MenuManagementPage() {
                               placeholder="Price"
                               className="bg-slate-800 border-slate-700 text-white"
                             />
-                            {editingItem?.price && !isNaN(Number(editingItem.price)) && (
-                              <p className="text-xs text-slate-400 mt-1 col-span-2">
-                                Customer price will be GH₵{(Number(editingItem.price) * 1.1).toFixed(2)} (includes 10% commission).
-                              </p>
-                            )}
                           </div>
                           <Input
                             value={editingItem?.description || ""}
@@ -588,6 +615,24 @@ export default function MenuManagementPage() {
                             placeholder="Description"
                             className="bg-slate-800 border-slate-700 text-white"
                           />
+                          <div className="grid grid-cols-2 gap-3">
+                            <Input
+                              type="number"
+                              value={editingItem?.preparation_time || ""}
+                              onChange={(e) => setEditingItem({ ...editingItem, preparation_time: Number.parseInt(e.target.value) || null })}
+                              placeholder="Prep time (mins)"
+                              className="bg-slate-800 border-slate-700 text-white"
+                            />
+                            <Input
+                              value={parseAndFormatIngredients(editingItem?.ingredients).join(", ")}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                setEditingItem({ ...editingItem, ingredients: parseAndFormatIngredients(value) })
+                              }}
+                              placeholder="Ingredients (comma-separated)"
+                              className="bg-slate-800 border-slate-700 text-white"
+                            />
+                          </div>
                           <div className="grid grid-cols-2 gap-3">
                             <Input
                               value={editingItem?.phone || ""}
@@ -668,6 +713,15 @@ export default function MenuManagementPage() {
                           <div>
                             <h3 className="font-bold text-lg text-white">{item.name}</h3>
                             <p className="text-sm text-slate-400 mt-1">{item.description}</p>
+                            {parseAndFormatIngredients(item.ingredients).length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {parseAndFormatIngredients(item.ingredients).map((ingredient) => (
+                                  <Badge key={ingredient} variant="secondary" className="text-xs">
+                                    {ingredient}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-purple-600">GH₵{item.price.toFixed(2)}</p>
