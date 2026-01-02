@@ -1,16 +1,12 @@
+"use client"
+
 import type React from "react"
-import type { Metadata } from "next"
-import { Analytics } from "@vercel/analytics/next"
+import { useEffect } from "react"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-
-
-
-export const metadata: Metadata = {
-  title: "ChefFlow - Restaurant Management System",
-  description: "Complete restaurant management system with NFC menu, staff tracking, and admin dashboard",
-    generator: 'Mickie'
-}
+import { LoadingProvider, useLoading } from "@/components/loading-provider"
+import { usePathname } from "next/navigation"
 
 export default function RootLayout({
   children,
@@ -20,9 +16,31 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        {children}
+        <LoadingProvider>
+          <NavigationLoader>{children}</NavigationLoader>
+        </LoadingProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
+}
+
+function NavigationLoader({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const { showLoading, hideLoading } = useLoading()
+
+  useEffect(() => {
+    // Show loading when pathname changes (navigation starts)
+    showLoading()
+
+    // Hide loading after a short delay to allow the new page to render
+    const timer = setTimeout(() => {
+      hideLoading()
+    }, 300); // Adjust delay as needed
+
+    return () => clearTimeout(timer); // Clear timeout if component unmounts or pathname changes again
+  }, [pathname, showLoading, hideLoading]);
+
+  return <>{children}</>
 }
