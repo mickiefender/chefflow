@@ -27,6 +27,7 @@ export async function POST(request: Request) {
   const event = JSON.parse(body)
 
   if (event.event === "charge.success") {
+    console.log("Paystack event data:", JSON.stringify(event.data, null, 2))
     const { reference, amount, fees, channel, metadata } = event.data
     const order_id = metadata?.order_id
 
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
     }
 
     try {
+      console.log(`Processing order_id: ${order_id}`)
       // Update order payment_status and get the restaurant_id
       const { data: updatedOrder, error: orderError } = await supabase
         .from("orders")
@@ -48,6 +50,8 @@ export async function POST(request: Request) {
         console.error("Webhook Error: Failed to update order or get restaurant_id.", orderError)
         return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
       }
+
+      console.log(`Successfully updated order ${order_id}. Restaurant ID: ${updatedOrder.restaurant_id}`)
 
       // Update payment record status
       const { data: updatedPayment, error: updatePaymentError } = await supabase
@@ -62,13 +66,14 @@ export async function POST(request: Request) {
         // We can decide if we want to stop here or continue
       }
 
-      // Create transaction record
       if (updatedPayment) {
+        console.log(`Successfully updated payment record for reference: ${reference}`)
+        // Create transaction record
         const grossAmount = amount / 100
         const platformFee = fees / 100
         const netAmount = grossAmount - platformFee
 
-        await supabase.from("transactions").insert({
+        const { error: transactionError } = await supabase.from("transactions").insert({
           restaurant_id: updatedOrder.restaurant_id,
           payment_id: updatedPayment.id,
           gross_amount: grossAmount,
@@ -76,6 +81,12 @@ export async function POST(request: Request) {
           net_amount: netAmount,
           settlement_status: "PENDING",
         })
+
+        if (transactionError) {
+          console.error("Webhook Error: Failed to create transaction record.", transactionError)
+        } else {
+          console.log(`Successfully created transaction record for payment_id: ${updatedPayment.id}`)
+        }
       }
     } catch (error) {
       console.error("Webhook processing error:", error)

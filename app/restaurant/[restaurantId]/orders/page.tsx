@@ -49,12 +49,31 @@ function OrdersPageComponent() {
       if (!user) return
 
       // Find the admin's name to log it
-      const { data: admin } = await supabase.from("restaurant_admins").select("full_name").eq("id", user.id).single()
+      const { data: admin, error: adminError } = await supabase.from("restaurant_admins").select("full_name").eq("id", user.id).single()
+      
+      if (adminError) {
+        console.error("Error fetching admin full name:", adminError);
+        alert(`Failed to update order status: Could not retrieve admin details. Error: ${adminError.message}`);
+        return; // Abort if admin name cannot be fetched
+      }
+      const adminFullName = admin ? admin.full_name : "Unknown Admin";
+
+      const { error } = await supabase
+        .from("orders")
+        .update({ status, updated_at: new Date().toISOString(), updated_by_name: adminFullName })
+        .eq("id", orderId);
 
       if (error) {
         console.error("Error updating order status:", error);
         alert(`Failed to update order status: ${error.message}`);
       } else {
+        // Log activity
+        await supabase.from("activity_logs").insert({
+          restaurant_id: restaurantId,
+          staff_id: user.id,
+          action: "ORDER_STATUS_UPDATED",
+          details: { order_id: orderId, new_status: status },
+        });
         fetchOrders(); // Ensure UI refreshes
       }
     });
