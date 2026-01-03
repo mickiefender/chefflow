@@ -41,6 +41,10 @@ function OrdersPageComponent() {
   const [activeFilter, setActiveFilter] = useState(searchParams.get("status") || "all")
   const [isPending, startTransition] = useTransition()
 
+  useEffect(() => {
+    setActiveFilter(searchParams.get("status") || "all");
+  }, [searchParams]);
+
   const handleUpdateStatus = (orderId: string, status: string) => {
     startTransition(async () => {
       const {
@@ -266,11 +270,16 @@ function OrdersPageComponent() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <nav className="border-b border-slate-800 bg-slate-900 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href={`/restaurant/${restaurantId}/dashboard`}>
             <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Dashboard
+            </Button>
+          </Link>
+          <Link href={`/restaurant/${restaurantId}/orders/report`}>
+            <Button variant="outline" size="sm" className="border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white">
+              View Report
             </Button>
           </Link>
         </div>
@@ -327,14 +336,14 @@ function OrdersPageComponent() {
         {/* Filter Buttons */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {["all", "pending", "in-progress", "completed", "cancelled"].map((status) => (
-            <Button
-              key={status}
-              variant={activeFilter === status ? "default" : "outline"}
-              onClick={() => setActiveFilter(status)}
-              className={`capitalize flex-shrink-0 ${activeFilter === status ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"}`}
-            >
-              {status.replace("-", " ")}
-            </Button>
+            <Link key={status} href={`/restaurant/${restaurantId}/orders?status=${status}`} scroll={false}>
+              <Button
+                variant={activeFilter === status ? "default" : "outline"}
+                className={`capitalize flex-shrink-0 ${activeFilter === status ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+              >
+                {status.replace("-", " ")}
+              </Button>
+            </Link>
           ))}
         </div>
 

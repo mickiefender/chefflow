@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
         <h1 className="text-3xl font-bold text-white mb-8">Analytics & Reports</h1>
 
         {/* Key Metrics */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-5 gap-6 mb-8">
           <Card className="bg-slate-900 border-slate-800">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-slate-400">Total Revenue (30 days)</CardTitle>
@@ -154,20 +154,32 @@ export default function AnalyticsPage() {
               <div className="text-3xl font-bold text-white">GH¢{analytics?.totalRevenue.toFixed(2)}</div>
             </CardContent>
           </Card>
-          <Card className="bg-slate-900 border-slate-800">
+          <Link href={`/restaurant/${restaurantId}/orders?status=completed`}>
+            <Card className="bg-slate-900 border-slate-800 cursor-pointer hover:border-slate-700 h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-slate-400">Completed Orders</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-white">{analytics?.completedOrders}</div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href={`/restaurant/${restaurantId}/orders?status=pending`}>
+            <Card className="bg-slate-900 border-slate-800 cursor-pointer hover:border-slate-700 h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-slate-400">Pending Orders</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-white">{analytics?.pendingOrders}</div>
+              </CardContent>
+            </Card>
+          </Link>
+           <Card className="bg-slate-900 border-slate-800">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-400">Completed Orders</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Total Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">{analytics?.completedOrders}</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-slate-900 border-slate-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-400">Pending Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-white">{analytics?.pendingOrders}</div>
+              <div className="text-3xl font-bold text-white">{analytics?.totalOrders}</div>
             </CardContent>
           </Card>
           <Card className="bg-slate-900 border-slate-800">

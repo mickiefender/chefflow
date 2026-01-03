@@ -66,6 +66,7 @@ export default function StaffDashboard() {
   const [loading, setLoading] = useState(true)
   const [staffInfo, setStaffInfo] = useState<any>(null)
   const [restaurantName, setRestaurantName] = useState("Dashboard")
+  const [restaurantLogo, setRestaurantLogo] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [activeView, setActiveView] = useState("orders")
   const [menu, setMenu] = useState<MenuCategory[]>([])
@@ -86,12 +87,13 @@ export default function StaffDashboard() {
 
       const { data: restaurant } = await supabase
         .from("restaurants")
-        .select("name")
+        .select("name, logo_url")
         .eq("id", restaurantId)
         .single()
 
       if (restaurant) {
         setRestaurantName(restaurant.name)
+        setRestaurantLogo(restaurant.logo_url)
       }
 
       const { data: department } = await supabase
@@ -584,7 +586,10 @@ export default function StaffDashboard() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-6">
+        <div className="p-6 text-center">
+          {restaurantLogo && (
+            <img src={restaurantLogo} alt="Restaurant Logo" className="w-20 h-20 rounded-full mx-auto mb-4" />
+          )}
           <h2 className="text-xl font-bold text-white">{restaurantName}</h2>
           <p className="text-xs text-slate-400 mt-1">{staffInfo?.departments?.name} Dept.</p>
         </div>
