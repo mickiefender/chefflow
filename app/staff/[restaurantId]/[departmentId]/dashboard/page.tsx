@@ -31,6 +31,7 @@ interface OrderDetail {
   total_amount: number
   preparation_started_at?: string
   preparation_completed_at?: string
+  notes?: string
 }
 
 interface MenuItem {
@@ -411,6 +412,11 @@ export default function StaffDashboard() {
                       </div>
                     </CardHeader>
                     <CardContent>
+                      {order.notes && (
+                        <div className="mb-4 p-3 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 italic text-sm">
+                          <strong className="text-white">Notes:</strong> {order.notes}
+                        </div>
+                      )}
                       <div className="mb-6">
                         <h4 className="font-semibold text-white mb-2">Order Items ({order.order_items?.length})</h4>
                         <div className="space-y-2 text-sm max-h-48 overflow-y-auto">

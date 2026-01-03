@@ -10,6 +10,7 @@ import { useRealtimeMenu } from "@/lib/hooks/use-realtime-menu"
 import { LogOut, Minus, Plus, PackageSearch, Search, Send, ShoppingCart, Utensils } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { useCart } from "./use-cart"
 import type { Category } from "./types"
 
@@ -29,6 +30,7 @@ export default function MenuPage() {
   const [restaurantLogo, setRestaurantLogo] = useState<string | null>(null)
   const [tableNumber, setTableNumber] = useState("")
   const [customerEmail, setCustomerEmail] = useState("")
+  const [orderNotes, setOrderNotes] = useState("")
 
   const { menuItems, loading: menuLoading } = useRealtimeMenu(restaurantId)
 
@@ -114,6 +116,7 @@ export default function MenuPage() {
             price: item.price,
           })),
           customerEmail,
+          notes: orderNotes,
         }),
       })
 
@@ -472,6 +475,20 @@ export default function MenuPage() {
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
                       className="text-xs sm:text-base py-2 sm:py-3"
+                    />
+                  </div>
+
+                  {/* Order Notes Input */}
+                  <div className="mb-4">
+                    <label htmlFor="order-notes" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                      Notes for your order (e.g., "more pepper", "no onions")
+                    </label>
+                    <Textarea
+                      id="order-notes"
+                      placeholder="Add any special requests or notes here..."
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
+                      className="text-xs sm:text-base py-2 sm:py-3 min-h-[80px]"
                     />
                   </div>
 

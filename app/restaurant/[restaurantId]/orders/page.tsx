@@ -27,6 +27,7 @@ interface OrderWithDetails {
   restaurant_tables: { table_number: string } | null
   order_items: OrderItem[]
   payments: any[]
+  notes: string | null
 }
 
 function OrdersPageComponent() {
@@ -165,6 +166,7 @@ function OrdersPageComponent() {
         payment_method,
         updated_at,
         updated_by_name,
+        notes,
         restaurant_tables ( table_number ),
         order_items ( menu_items ( image_url ) ),
         payments(*)
@@ -373,6 +375,9 @@ function OrdersPageComponent() {
                               Table: {order.restaurant_tables?.table_number || "N/A"}
                             </p>
                             <p className="text-xs text-slate-400 mt-1">{new Date(order.created_at).toLocaleString()}</p>
+                            {order.notes && (
+                              <p className="text-xs text-slate-300 italic mt-1">Notes: {order.notes}</p>
+                            )}
                           </div>
                           <div className="text-right space-y-2 flex items-center gap-2">
                             <div>

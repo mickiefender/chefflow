@@ -25,6 +25,7 @@ interface Order {
   }[]
   preparation_started_at?: string
   preparation_completed_at?: string
+  notes?: string
 }
 
 export function useRealtimeOrders(restaurantId: string, departmentName?: string) {
@@ -46,7 +47,7 @@ export function useRealtimeOrders(restaurantId: string, departmentName?: string)
 
     try {
       const selectStatement = `
-        id, created_at, total_amount, status, payment_status, updated_at, updated_by_name,
+        id, created_at, total_amount, status, payment_status, updated_at, updated_by_name, notes,
         preparation_started_at, preparation_completed_at,
         restaurant_tables ( table_number ),
         order_items ( id, quantity, status, menu_items ( name, image_url, menu_categories ( type ) ) )

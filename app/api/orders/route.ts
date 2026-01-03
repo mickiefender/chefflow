@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const body = await request.json()
 
-    const { restaurantId, tableId, items, customerName, customerEmail } = body
+    const { restaurantId, tableId, items, customerName, customerEmail, notes } = body
 
     // Create order
     const { data: order, error: orderError } = await supabase
@@ -38,9 +38,10 @@ export async function POST(request: NextRequest) {
         restaurant_id: restaurantId,
         table_id: tableId,
         customer_name: customerName,
-        customer_email: customerEmail, // Add customer_email here
+        customer_email: customerEmail,
         status: "Pending",
         total_amount: 0,
+        notes: notes,
       })
       .select()
       .single()
