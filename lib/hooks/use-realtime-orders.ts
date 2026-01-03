@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/components/ui/use-toast"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 
 interface Order {
@@ -26,6 +27,8 @@ interface Order {
   preparation_started_at?: string
   preparation_completed_at?: string
   notes?: string
+  human_readable_id?: string
+  payments?: any[] // Add payments property here
 }
 
 export function useRealtimeOrders(restaurantId: string, departmentName?: string) {
@@ -33,6 +36,7 @@ export function useRealtimeOrders(restaurantId: string, departmentName?: string)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const [refetchCounter, setRefetchCounter] = useState(0)
+  const { toast } = useToast()
 
   const getDepartmentType = (name?: string): "food" | "drink" | "all" => {
     if (!name) return "all"
@@ -47,10 +51,11 @@ export function useRealtimeOrders(restaurantId: string, departmentName?: string)
 
     try {
       const selectStatement = `
-        id, created_at, total_amount, status, payment_status, updated_at, updated_by_name, notes,
+        id, created_at, total_amount, status, payment_status, updated_at, updated_by_name, notes, human_readable_id,
         preparation_started_at, preparation_completed_at,
         restaurant_tables ( table_number ),
-        order_items ( id, quantity, status, menu_items ( name, image_url, menu_categories ( type ) ) )
+        order_items ( id, quantity, status, menu_items ( name, image_url, menu_categories ( type ) ) ),
+        payments(*)
       `
 
       const { data, error } = await supabase
@@ -124,8 +129,38 @@ export function useRealtimeOrders(restaurantId: string, departmentName?: string)
           table: "orders",
           filter: `restaurant_id=eq.${restaurantId}`,
         },
-        () => {
-          setRefetchCounter(prev => prev + 1)
+        (payload) => {
+          // Trigger a refetch to update the UI
+          setRefetchCounter((prev) => prev + 1)
+
+          const newOrder = payload.new as Order
+          const oldOrder = payload.old as Order
+
+          if (payload.eventType === "INSERT") {
+            const tableNumber = newOrder.restaurant_tables?.table_number || "N/A"
+            toast({
+              title: "🚀 New Order Received!",
+              description: `Order #${newOrder.human_readable_id} just placed from Table ${tableNumber}.`,
+              variant: "default",
+            })
+          } else if (payload.eventType === "UPDATE") {
+            // Check if status or payment_status has changed
+            if (oldOrder?.status !== newOrder.status) {
+              const tableNumber = newOrder.restaurant_tables?.table_number || "N/A"
+              toast({
+                title: "🔔 Order Status Updated",
+                description: `Order #${newOrder.human_readable_id} from Table ${tableNumber} is now ${newOrder.status}.`,
+                variant: "secondary",
+              })
+            } else if (oldOrder?.payment_status !== newOrder.payment_status) {
+              const tableNumber = newOrder.restaurant_tables?.table_number || "N/A"
+              toast({
+                title: "💰 Order Payment Updated",
+                description: `Order #${newOrder.human_readable_id} from Table ${tableNumber} is now ${newOrder.payment_status}.`,
+                variant: "secondary",
+              })
+            }
+          }
         },
       )
       .subscribe()

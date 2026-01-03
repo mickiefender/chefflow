@@ -171,6 +171,9 @@ export default function MenuPage() {
         }
 
         const result = await response.json()
+        clearCart() // Clear cart after order is successfully created and payment initiated
+        setCustomerEmail("") // Clear customer email
+        setOrderNotes("") // Clear order notes
         router.push(result.authorization_url)
       } catch (error) {
         console.error("Payment initialization error:", error)

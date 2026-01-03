@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/client"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ArrowLeft, UtensilsCrossed, AlertCircle, MoreHorizontal, Clock, CheckCircle, XCircle, Loader2, CreditCard } from "lucide-react"
 import Link from "next/link"
+import { useRealtimeOrders } from "@/lib/hooks/use-realtime-orders"
+import type { Order as OrderType } from "@/lib/hooks/use-realtime-orders"
 
 interface OrderItem {
   menu_items: {
@@ -15,19 +17,10 @@ interface OrderItem {
   } | null
 }
 
-interface OrderWithDetails {
-  id: string
-  status: string
-  payment_status: string
-  payment_method: string
-  total_amount: number
-  created_at: string
-  updated_at: string | null
-  updated_by_name: string | null
-  restaurant_tables: { table_number: string } | null
-  order_items: OrderItem[]
-  payments: any[]
-  notes: string | null
+// Using OrderType from useRealtimeOrders for consistency
+type OrderWithDetails = OrderType & {
+  payments: any[]; // Add payments property if it's not in OrderType
+  human_readable_id: string; // Ensure this is present
 }
 
 function OrdersPageComponent() {
@@ -37,14 +30,13 @@ function OrdersPageComponent() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 
-  const [orders, setOrders] = useState<OrderWithDetails[]>([])
-  const [loading, setLoading] = useState(true)
+  const { orders, loading, refetch } = useRealtimeOrders(restaurantId)
   const [activeFilter, setActiveFilter] = useState(searchParams.get("status") || "all")
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
-    setActiveFilter(searchParams.get("status") || "all");
-  }, [searchParams]);
+    setActiveFilter(searchParams.get("status") || "all")
+  }, [searchParams])
 
   const handleUpdateStatus = (orderId: string, status: string) => {
     startTransition(async () => {
@@ -79,7 +71,7 @@ function OrdersPageComponent() {
           action: "ORDER_STATUS_UPDATED",
           details: { order_id: orderId, new_status: status },
         });
-        fetchOrders(); // Ensure UI refreshes
+        refetch(); // Ensure UI refreshes
       }
     });
   };
@@ -114,7 +106,7 @@ function OrdersPageComponent() {
         details: { order_id: orderId },
       })
 
-      fetchOrders() // Refetch orders to update UI
+      refetch() // Refetch orders to update UI
     })
   }
 
@@ -128,75 +120,12 @@ function OrdersPageComponent() {
 
       if (response.ok) {
         alert("Refund processed successfully!")
-        fetchOrders()
+        refetch()
       } else {
         const { error, details } = await response.json()
         alert(`Refund failed: ${error} - ${details}`)
       }
     })
-  }
-
-  useEffect(() => {
-    fetchOrders()
-
-    const channel = supabase
-      .channel(`orders-page-realtime:${restaurantId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders", filter: `restaurant_id=eq.${restaurantId}` },
-        () => fetchOrders(),
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [restaurantId])
-
-  const fetchOrders = async () => {
-    const { data, error } = await supabase
-      .from("orders")
-      .select(
-        `
-        id,
-        created_at,
-        total_amount,
-        status,
-        payment_status,
-        payment_method,
-        updated_at,
-        updated_by_name,
-        notes,
-        restaurant_tables ( table_number ),
-        order_items ( menu_items ( image_url ) ),
-        payments(*)
-      `,
-      )
-      .eq("restaurant_id", restaurantId)
-      .order("created_at", { ascending: false })
-
-    if (data) {
-      console.log("Fetched Orders Data:", data);
-      // Transform data to match OrderWithDetails type
-      const transformed = data.map((order: any) => ({
-        ...order,
-        restaurant_tables: Array.isArray(order.restaurant_tables)
-          ? order.restaurant_tables[0] || null
-          : order.restaurant_tables || null,
-        order_items: Array.isArray(order.order_items)
-          ? order.order_items.map((item: any) => ({
-              ...item,
-              menu_items: Array.isArray(item.menu_items)
-                ? item.menu_items[0] || null
-                : item.menu_items || null,
-            }))
-          : [],
-      }))
-      setOrders(transformed)
-    } else if (error) {
-     console.error("Error fetching orders:", JSON.stringify(error, null, 2));
-    }
-    setLoading(false)
   }
 
   const getStatusColor = (status: string) => {
