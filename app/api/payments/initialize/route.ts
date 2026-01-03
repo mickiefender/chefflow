@@ -3,10 +3,14 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   const supabase = await createClient()
-  const { order_id } = await request.json()
+  const { order_id, table_id } = await request.json()
 
   if (!order_id) {
     return NextResponse.json({ error: "Order ID is required" }, { status: 400 })
+  }
+
+  if (!table_id) {
+    return NextResponse.json({ error: "Table ID is required" }, { status: 400 })
   }
 
   // 1. Fetch order details
@@ -38,17 +42,20 @@ export async function POST(request: Request) {
 
   const amountInKobo = Math.round(order.total_amount * 100)
   const platformCommission = Math.round(0.10 * amountInKobo) // 10% commission
+  const requestUrl = new URL(request.url)
+  const callbackUrl = `${requestUrl.protocol}//${requestUrl.host}/menu/${table_id}`
 
   const paystackBody = {
     email: order.customer_email || restaurant.email || "customer@example.com", // customer_email is used as email
     amount: amountInKobo,
+    callback_url: callbackUrl,
     subaccount: restaurant.paystack_subaccount_code,
     transaction_charge: platformCommission,
     bearer: "subaccount",
     channels: ["card", "mobile_money"],
     metadata: {
       order_id: order_id,
-    }
+    },
   }
 
   try {

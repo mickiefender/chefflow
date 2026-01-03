@@ -237,6 +237,10 @@ export default function RestaurantDashboard() {
   const paidToday = todaysOrders.filter(order => order.payment_status === "PAID").length
   const unpaidToday = todaysOrders.length - paidToday
 
+  const todaysSales = todaysOrders
+    .filter(order => order.payment_status === "PAID")
+    .reduce((sum, order) => sum + (Number.parseFloat(order.total_amount || "0") || 0), 0)
+
   const dailyOrderData = [
     { name: 'Paid', value: paidToday, fill: '#4ade80' }, // green-400
     { name: 'Unpaid', value: unpaidToday, fill: '#f87171' }, // red-400
@@ -472,35 +476,43 @@ export default function RestaurantDashboard() {
             </div>
           </div>
 
-          {/* Audience & Recent Orders */}
+          {/* Today's Stats & Recent Orders */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Audience Card */}
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-white">Audience</CardTitle>
-                <p className="text-sm text-slate-400">Customers have visited website</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-400">Male</span>
-                    <span className="text-sm font-medium text-white">68%</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Today's Sales Card */}
+              <Card className="bg-slate-900 border-slate-800">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <CardTitle className="text-sm font-medium text-slate-400">Today's Sales</CardTitle>
+                    </div>
+                    <TrendingUp className="w-4 h-4 text-slate-500" />
                   </div>
-                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full w-[68%] bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">GH₵{todaysSales.toLocaleString()}</div>
+                  <p className="text-sm text-slate-500 mt-2">Total sales from paid orders today</p>
+                </CardContent>
+              </Card>
+
+              {/* Today's Orders Card */}
+              <Card className="bg-slate-900 border-slate-800">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <CardTitle className="text-sm font-medium text-slate-400">Today's Orders</CardTitle>
+                    </div>
+                    <ShoppingCart className="w-4 h-4 text-slate-500" />
                   </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-400">Female</span>
-                    <span className="text-sm font-medium text-white">32%</span>
-                  </div>
-                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full w-[32%] bg-gradient-to-r from-purple-600 to-blue-600 rounded-full"></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-white">{todaysOrders.length}</div>
+                  <p className="text-sm text-slate-500 mt-2">{paidToday} paid, {unpaidToday} pending</p>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Recent Orders */}
             <Card className="bg-slate-900 border-slate-800">

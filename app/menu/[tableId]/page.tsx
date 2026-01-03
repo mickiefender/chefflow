@@ -152,7 +152,7 @@ export default function MenuPage() {
         const response = await fetch("/api/payments/initialize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ order_id: orderId }),
+          body: JSON.stringify({ order_id: orderId, table_id: tableId }),
         })
 
         if (!response.ok) {
