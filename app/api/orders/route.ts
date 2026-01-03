@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const itemIds = items.map((item: any) => item.menuItemId);
     const { data: menuItemsData, error: menuItemsError } = await supabase
         .from("menu_items")
-        .select("id, name, price, menu_categories(type)")
+        .select("id, name, price, image_url, menu_categories(type)")
         .in("id", itemIds);
 
     if (menuItemsError) throw menuItemsError;
@@ -92,19 +92,22 @@ export async function POST(request: NextRequest) {
     // Update order total
     await supabase.from("orders").update({ total_amount: total }).eq("id", order.id)
 
-    // Fetch restaurant details for email (name)
+    // Fetch restaurant details for email (name and logo)
+    let restaurantName = "Your Restaurant";
+    let restaurantLogo: string | null = null;
     const { data: restaurantData, error: restaurantError } = await supabase
         .from("restaurants")
-        .select("name")
+        .select("name, logo_url")
         .eq("id", restaurantId)
         .single();
 
     if (restaurantError) {
-        console.error("Error fetching restaurant name for email:", restaurantError);
+        console.error("Error fetching restaurant name or logo for email:", restaurantError);
         // Do not throw, email sending is a secondary concern
+    } else if (restaurantData) {
+        restaurantName = restaurantData.name;
+        restaurantLogo = restaurantData.logo_url;
     }
-
-    const restaurantName = restaurantData?.name || "Your Restaurant";
 
     // Fetch table number for email
     const { data: tableData, error: tableError } = await supabase
@@ -122,13 +125,13 @@ export async function POST(request: NextRequest) {
 
     // Prepare ordered items for email
     const orderedItemsForEmail = items.map((item: any) => {
-      const menuItem = menuItemsMap.get(item.menuItemId);
-      return { 
-        name: menuItem?.name || "Unknown Item", 
-        quantity: item.quantity, 
-        price: menuItem?.price || 0 
-      };
-    });
+            const menuItem = menuItemsMap.get(item.menuItemId);
+            return {
+              name: menuItem?.name || "Unknown Item",
+              quantity: item.quantity,
+              price: menuItem?.price || 0,
+              imageUrl: menuItem?.image_url || null,
+            };    });
 
 
     // Trigger email sending if customerEmail is provided
@@ -141,6 +144,7 @@ export async function POST(request: NextRequest) {
             to: customerEmail,
             orderId: order.human_readable_id, // Use the new human-readable ID
             restaurantName: restaurantName,
+            restaurantLogo: restaurantLogo,
             tableNumber: tableNumber,
             orderedItems: orderedItemsForEmail,
             totalAmount: total,
