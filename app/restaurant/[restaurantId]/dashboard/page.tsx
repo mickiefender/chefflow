@@ -95,18 +95,10 @@ export default function RestaurantDashboard() {
   const { orders: completedOrdersData, refetch: completedOrdersRefetch } = useRealtimeOrders(restaurantId, "completed")
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        router.push("/auth/login")
-      }
-    }
+   
 
     const fetchInitialStaticData = async () => {
-      await checkAuth()
+    
       try {
         const { data: staff } = await supabase.from("staff_members").select("id").eq("restaurant_id", restaurantId)
 
