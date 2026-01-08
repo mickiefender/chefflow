@@ -25,7 +25,7 @@ interface Order {
   total_amount: number
   payment_status: string
   payment_method: string
-  order_status: string // e.g., 'PENDING', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED'
+  status: string // e.g., 'PENDING', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED'
   customer_email: string
   preparation_started_at?: string
   preparation_completed_at?: string
@@ -60,6 +60,7 @@ export default function OrderTrackingPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null) // Corrected position
   const supabase = createClient()
   const searchParams = useSearchParams()
   const params = useParams()
@@ -202,7 +203,7 @@ export default function OrderTrackingPage() {
               </p>
               <p>
                 <strong>Status:</strong>{" "}
-                <span className="font-medium text-primary uppercase">{order.order_status}</span>
+                <span className="font-medium text-primary uppercase">{order.status}</span>
               </p>
               <p>
                 <strong>Payment Method:</strong>{" "}
@@ -218,12 +219,12 @@ export default function OrderTrackingPage() {
               <p>
                 <strong>Customer Email:</strong> {order.customer_email}
               </p>
-              {order.order_status && order.order_status.toLowerCase() === "in-progress" && order.preparation_started_at && (
+              {order.status && order.status.toLowerCase() === "in-progress" && order.preparation_started_at && (
                 <p>
                   <strong>Preparation Time:</strong> <Timer startTime={order.preparation_started_at} />
                 </p>
               )}
-              {order.order_status && order.order_status.toLowerCase() === "completed" &&
+              {order.status && order.status.toLowerCase() === "completed" &&
                 order.preparation_started_at &&
                 order.preparation_completed_at && (
                   <p>
@@ -261,7 +262,11 @@ export default function OrderTrackingPage() {
             )}
           </CardContent>
           <CardFooter>
-            <p className="text-sm text-muted-foreground">You will see real-time updates to your order status here.</p>
+            <p className="text-sm text-muted-foreground">
+              {lastUpdated
+                ? `Last updated in real-time: ${lastUpdated}`
+                : "You will see real-time updates to your order status here."}
+            </p>
           </CardFooter>
         </Card>
       </div>

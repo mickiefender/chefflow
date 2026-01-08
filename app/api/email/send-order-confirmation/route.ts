@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
                   overflow: hidden;
               }
               .header {
-                  background-color: #4CAF50; /* A fresh green */
+                  background-color: #9333ea; /* Purple-600 */
                   padding: 30px 20px;
                   text-align: center;
                   color: #ffffff;
@@ -150,15 +150,15 @@ export async function POST(req: NextRequest) {
                   font-size: 14px;
               }
               .order-details th {
-                  background-color: #eef4ee; /* Lighter green tint */
+                  background-color: #ede9fe; /* Light purple tint */
                   font-weight: 600;
-                  color: #4CAF50;
+                  color: #9333ea;
               }
               .order-details tbody tr:last-child td {
                   border-bottom: none;
               }
               .order-summary {
-                  background-color: #e8f5e9; /* Even lighter green */
+                  background-color: #f5f3ff; /* Very light purple */
                   border-radius: 8px;
                   padding: 20px;
                   margin-top: 25px;
